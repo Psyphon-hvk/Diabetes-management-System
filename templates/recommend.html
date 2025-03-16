@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Recommendation</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0fdf4; /* Light green background */
+            color: #2d6a4f; /* Deep green text */
+            text-align: center;
+            padding: 20px;
+            position: relative;
+        }
+
+        h2 {
+            color: #1b4332; /* Dark green */
+            margin-top: 60px;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            display: inline-block;
+        }
+
+        input {
+            padding: 10px;
+            margin: 10px 0;
+            border: 2px solid #2d6a4f;
+            border-radius: 5px;
+            font-size: 16px;
+            width: 200px;
+        }
+
+        button {
+            background-color: #2d6a4f;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+            margin-top: 10px;
+        }
+
+        button:hover {
+            background-color: #1b4332;
+        }
+
+        h3 {
+            color: #1b4332;
+            margin-top: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        li {
+            background: white;
+            margin: 10px auto;
+            padding: 10px;
+            width: 50%;
+            border-radius: 5px;
+            box-shadow: 0px 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        /* Home Button (Top Left Corner) */
+        .home-btn {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: #40916c; /* Green shade */
+            padding: 10px 15px;
+            font-size: 16px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            color: white;
+            text-decoration: none;
+        }
+
+        .home-btn:hover {
+            background-color: #1b4332;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Home Button (Top Left) -->
+    <button onclick="window.location.href='http://127.0.0.1:8000/predict/'" class="home-btn">
+        <i class="fa-solid fa-house"></i> Home
+    </button>
+
+    <h2>Enter Your Blood Sugar Level</h2>
+    <form method="post">
+        {% csrf_token %}
+        <input type="number" name="blood_sugar" step="0.1" required>
+        <br>
+        <button type="submit">Get Recommendations</button>
+    </form>
+
+    {% if meals %}
+        <h3>Recommended Meals:</h3>
+        <ul>
+            {% for meal in meals %}
+                <li>{{ meal }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+</body>
+</html>

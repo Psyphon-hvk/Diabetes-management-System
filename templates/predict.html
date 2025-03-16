@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/js/all.min.js" crossorigin="anonymous"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Diabetes Prediction</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            background: linear-gradient(to right,rgb(233, 233, 233),rgb(66, 135, 204));
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            padding: 20px;
+            text-align: center;
+        }
+        .container {
+            width: 100%;
+            max-width: 450px;
+            padding: 25px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.15);
+            margin-bottom: 20px;
+        }
+        h2 {
+            margin-bottom: 15px;
+            color: #0a6847;
+        }
+        label {
+            display: block;
+            margin-top: 12px;
+            font-weight: bold;
+            text-align: left;
+            color: #333;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+        }
+        .submit-btn {
+            margin-top: 20px;
+            background: #0a6847;
+            color: white;
+            border: none;
+            padding: 12px;
+            width: 100%;
+            cursor: pointer;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        .submit-btn:hover {
+            background: #007acc;
+        }
+        .loading {
+            display: none;
+            margin-top: 15px;
+            font-size: 16px;
+            font-weight: bold;
+            color: #0a6847;
+        }
+        .message {
+            margin-top: 20px;
+            padding: 10px;
+            border-radius: 6px;
+            display: none;
+            font-weight: bold;
+        }
+        .nav-btn {
+            position: absolute;
+            left: 10px;
+            background: #0a6847;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+        .nav-btn:hover {
+            background: #007acc;
+        }
+        .home-btn {
+            top: 10px;
+        }
+        .new-btn {
+            top: 55px;
+        }
+        .refresh-btn {
+            top: 100px;
+        }
+        table {
+            width: 90%;
+            border-collapse: collapse;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            text-align: center;
+        }
+        th {
+            background: #0a6847;
+            color: white;
+        }
+        .delete-btn {
+            background: #d9534f;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            cursor: pointer;
+            border-radius: 6px;
+        }
+        .delete-btn:hover {
+            background: #c9302c;
+        }
+        .clear-btn {
+            background: #f44336;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            cursor: pointer;
+            border-radius: 6px;
+            margin-top: 15px;
+            font-size: 14px;
+        }
+        .clear-btn:hover {
+            background: #d32f2f;
+        }
+    </style>
+</head>
+<body onload="loadRecords()">
+    <button onclick="window.location.href='http://127.0.0.1:8000/'" class="nav-btn home-btn">🏠 Home</button>
+    <button onclick="window.location.href='http://127.0.0.1:8000/recommend/'" class="nav-btn new-btn">🍎 Recommendations</button>
+    <button onclick="location.reload()" class="nav-btn refresh-btn">🔄 Refresh</button>
+    <div class="container">
+        <h2>Diabetes Prediction</h2>
+        <form onsubmit="checkDiabetes(event)">
+            <label for="name">Name:</label>
+            <input type="text" id="name" required>
+            <label for="blood_sugar">Blood Sugar Level (mg/dL):</label>
+            <input type="text" id="blood_sugar" required>
+            <button type="submit" class="submit-btn">Analyse</button>
+        </form>
+        <div id="loading" class="loading">Analysing...</div>
+        <div id="result" class="message"></div>
+    </div>
+
+    <table id="resultTable">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Blood Sugar</th>
+                <th>Status</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+   <script>
+    document.addEventListener("DOMContentLoaded", loadRecords);
+
+    function checkDiabetes(event) {
+        event.preventDefault();
+        let name = document.getElementById("name").value.trim();
+        let bloodSugar = parseFloat(document.getElementById("blood_sugar").value);
+        let status = bloodSugar < 70 ? "Hypoglycemia" : bloodSugar <= 99 ? "Normal" : bloodSugar <= 125 ? "Prediabetes" : "Diabetes";
+
+        let records = JSON.parse(localStorage.getItem("records")) || [];
+        let newRecord = { name, bloodSugar, status };
+        records.push(newRecord);
+        localStorage.setItem("records", JSON.stringify(records));
+
+        addRowToTable(newRecord);
+    }
+
+    function addRowToTable(record) {
+        let table = document.getElementById("resultTable").getElementsByTagName("tbody")[0];
+        let newRow = table.insertRow();
+        newRow.innerHTML = `<td>${record.name}</td><td>${record.bloodSugar}</td><td>${record.status}</td><td><button class='delete-btn' onclick='deleteRow(this)'>Delete</button></td>`;
+    }
+
+    function loadRecords() {
+        let records = JSON.parse(localStorage.getItem("records")) || [];
+        let table = document.getElementById("resultTable").getElementsByTagName("tbody")[0];
+        table.innerHTML = "";
+        records.forEach(record => addRowToTable(record));
+    }
+
+    function deleteRow(button) {
+        let row = button.parentNode.parentNode;
+        let index = row.rowIndex - 1;
+        let records = JSON.parse(localStorage.getItem("records")) || [];
+        records.splice(index, 1);
+        localStorage.setItem("records", JSON.stringify(records));
+
+        row.parentNode.removeChild(row);
+    }
+</script>
+
+</body>
+</html>
